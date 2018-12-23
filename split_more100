@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #!/bin/sh
 #!/bin/bash
 
@@ -288,3 +289,9 @@ touch $LOGJOB/"$FOLDER_CLOUD_NAME"_verificacion.txt
   echo "RAR con error!!!!!!!!!!!!!!"
   fi
 
+=======
+Esta es la linea 1
+linea 2
+linea 3
+linea 4
+>>>>>>> 16d5038e79792a0b240f206663fa6d20ae0ec8d9
