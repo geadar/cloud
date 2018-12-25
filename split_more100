@@ -2,24 +2,36 @@
 #!/bin/sh
 #!/bin/bash
 
+
+filecloud=$(pwd)
+echo $filecloud
+
+# Folders
+LIST=$filecloud
+LOG=$filecloud/log
+TMP=$filecloud/tmp
+
+echo $LIST
+echo $LOG
+echo $TMP
+
+
 # Folders
 LIST=/DATA2/HISTORICO-DATA/split
 LOG=/DATA2/HISTORICO-DATA/split/log
 
 # archivos
-SET=/DATA2/HISTORICO-DATA/split/tmp/set.txt
-TIME=/DATA2/HISTORICO-DATA/split/tmp/time.txt
-TIME1=/DATA2/HISTORICO-DATA/split/tmp/time1.txt
-TIME2=/DATA2/HISTORICO-DATA/split/tmp/time2.txt
-TIME3=/DATA2/HISTORICO-DATA/split/tmp/time3.txt
+SET=$TMP/set.txt
+TIME=$TMP/time.txt
+TIME1=$TMP/time1.txt
+TIME2=$TMP/time2.txt
+TIME3=$TMP/time3.txt
 
-
-
-TEMP1=/DATA2/HISTORICO-DATA/split/tmp/temp1.txt
-TEMP2=/DATA2/HISTORICO-DATA/split/tmp/temp2.txt
-TEMP3=/DATA2/HISTORICO-DATA/split/tmp/temp3.txt
-TEMP4=/DATA2/HISTORICO-DATA/split/tmp/temp4.txt
-TEMP5=/DATA2/HISTORICO-DATA/split/tmp/temp5.txt
+TEMP1=$TMP/temp1.txt
+TEMP2=$TMP/temp2.txt
+TEMP3=$TMP/temp3.txt
+TEMP4=$TMP/temp4.txt
+TEMP5=$TMP/temp5.txt
 
 
 cat /dev/null > $SET
@@ -36,7 +48,6 @@ cat /dev/null > $TEMP5
 
 #---------------------------------------------------------------
 # Captura del nombre del archivo .rar para generar las carpetas
-
 find $LIST/*.rar > $TEMP4
 
 awk -F "/" '{print $5}' $TEMP4 | sed 's/.rar//' > $TEMP5
@@ -48,14 +59,12 @@ FOLDER_CLOUD_NAME=$( cat $TEMP5 )
 echo $FOLDER_CLOUD_NAME
 
 # creacion de carpeta dentro de la carpeta log
-mkdir /DATA2/HISTORICO-DATA/split/log/"$FOLDER_CLOUD_NAME"
+mkdir $LOG/$FOLDER_CLOUD_NAME
 
 # link a la carpeta dentro del log
-LOGJOB=/DATA2/HISTORICO-DATA/split/log/"$FOLDER_CLOUD_NAME"
+LOGJOB=$LOG/$FOLDER_CLOUD_NAME
 
 echo $LOGJOB
-
-echo $LOGJOB/"$FOLDER_CLOUD_NAME"
 
 touch $LOGJOB/"$FOLDER_CLOUD_NAME"_unrar.txt
 
@@ -73,7 +82,7 @@ valuerar=$( grep -ic "All OK" $LOGJOB/"$FOLDER_CLOUD_NAME"_unrar.txt )
 	#echo "-------------------------------------------------------"
 
 	#----crear la carpeta en el CLOUD
-	/usr/sbin/drive folder -t $FOLDER_CLOUD_NAME 
+	/usr/sbin/drive folder -t $FOLDER_CLOUD_NAME
 
 	#----Tamaño de cada archivo
 
@@ -84,12 +93,12 @@ valuerar=$( grep -ic "All OK" $LOGJOB/"$FOLDER_CLOUD_NAME"_unrar.txt )
 	#echo "-------------------------------------------------------"
 
 	#-----Crea Folder local temporal
-	mkdir /DATA2/HISTORICO-DATA/split/"$FOLDER_CLOUD_NAME"
-	touch /DATA2/HISTORICO-DATA/split/log/$FOLDER_CLOUD_NAME/"$FOLDER_CLOUD_NAME"_log.txt
+	mkdir $LIST/$FOLDER_CLOUD_NAME
+	touch $LOG/$FOLDER_CLOUD_NAME/"$FOLDER_CLOUD_NAME"_log.txt
 
 	#------extraer el id del folder del cloud-------------
 
-	FOLDER_CLOUD_ID=/DATA2/HISTORICO-DATA/split/tmp/id.txt
+	FOLDER_CLOUD_ID=$TMP/id.txt
 
 	/usr/sbin/drive list -t $FOLDER_CLOUD_NAME > $TEMP1
 
@@ -109,10 +118,10 @@ valuerar=$( grep -ic "All OK" $LOGJOB/"$FOLDER_CLOUD_NAME"_unrar.txt )
 	start=$(date +%s.%N)
 
 	# armado de las partes a subir
-	split -a 3 -d --bytes="$SIZE"M /DATA2/HISTORICO-DATA/split/*.rar /DATA2/HISTORICO-DATA/split/"$FOLDER_CLOUD_NAME"/"$FOLDER_CLOUD_NAME"_
+	split -a 3 -d --bytes="$SIZE"M $LIST/*.rar $LIST/$FOLDER_CLOUD_NAME/"$FOLDER_CLOUD_NAME"_
 
 
-	ls /DATA2/HISTORICO-DATA/split/"$FOLDER_CLOUD_NAME" | wc -l > $SET
+	ls $LIST/$FOLDER_CLOUD_NAME | wc -l > $SET
 
 	echo $SET
 
@@ -129,112 +138,88 @@ valuerar=$( grep -ic "All OK" $LOGJOB/"$FOLDER_CLOUD_NAME"_unrar.txt )
         		if [ $i -lt 10 ];                  # If $i is smaller than 10
         		then
             		start1=$(date +%s.%N)
-
-            		drive upload --parent $ID --file $LIST/"$FOLDER_CLOUD_NAME"/"$FOLDER_CLOUD_NAME"_00$i
+                # subida partes 1-10
+            		drive upload --parent $ID --file $LIST/$FOLDER_CLOUD_NAME/"$FOLDER_CLOUD_NAME"_00$i
 
             		end1=$(date +%s.%N)
-            		runtime1=$(python -c "print(${end1} - ${start1})")            
+            		runtime1=$(python -c "print(${end1} - ${start1})")
             		seconds1=`echo "$runtime1" | awk '{printf "%.0f\n", $1}'`
- 
             		hours1=$((${seconds1} / ${SECONDS_PER_HOUR}))
             		seconds1=$((${seconds1} % ${SECONDS_PER_HOUR}))
             		minutes1=$((${seconds1} / ${SECONDS_PER_MINUTE}))
             		seconds1=$((${seconds1} % ${SECONDS_PER_MINUTE}))
+            		printf "%02d:%02d:%02d\n" ${hours1} ${minutes1} ${seconds1} > $TIME1
+            		LOG1=`cat $TIME1`
 
-            		printf "%02d:%02d:%02d\n" ${hours1} ${minutes1} ${seconds1} > $TIME1 
-           
-            		LOG1=`cat $TIME1` 
+            		echo "$FOLDER_CLOUD_NAME"_00$i tiempo $LOG1 hh:mm:ss >> $LOGJOB/"$FOLDER_CLOUD_NAME"_log.txt
+            		echo "$FOLDER_CLOUD_NAME"_00$i tiempo $LOG1 hh:mm:ss
 
-            		echo "$FOLDER_CLOUD_NAME_00$i tiempo $LOG1 hh:mm:ss" >> $LOGJOB/"$FOLDER_CLOUD_NAME"_log.txt
-           
-#            echo "This is the body" | mutt -s "Cloud parte 0$i OK" gustavo.adorno@gmail.com  <<< "Parte 0$i OK timepo de $LOG1 hh:mm:ss"
-            		echo "$FOLDER_CLOUD_NAME_00$i tiempo $LOG1 hh:mm:ss"        
+            elif [ $i -lt 99 ];                  # If $i is smaller than 99
+            then
+                start2=$(date +%s.%N)
+                # subida partes 11-99
+                drive upload --parent $ID --file $LIST/$FOLDER_CLOUD_NAME/"$FOLDER_CLOUD_NAME"_0$i
 
-                        elif [ $i -lt 99 ];                  # If $i is smaller than 99
-                        then
-                        start2=$(date +%s.%N)
+                end2=$(date +%s.%N)
+                runtime2=$(python -c "print(${end2} - ${start2})")
+                seconds2=`echo "$runtime2" | awk '{printf "%.0f\n", $1}'`
+                hours2=$((${seconds2} / ${SECONDS_PER_HOUR}))
+                seconds2=$((${seconds2} % ${SECONDS_PER_HOUR}))
+                minutes2=$((${seconds2} / ${SECONDS_PER_MINUTE}))
+                seconds2=$((${seconds2} % ${SECONDS_PER_MINUTE}))
+                printf "%02d:%02d:%02d\n" ${hours2} ${minutes2} ${seconds2} > $TIME2
+                LOG2=`cat $TIME2`
 
-                        drive upload --parent $ID --file $LIST/"$FOLDER_CLOUD_NAME"/"$FOLDER_CLOUD_NAME"_0$i
+                echo "$FOLDER_CLOUD_NAME"_0$i OK tiempo $LOG2 hh:mm:ss >> $LOGJOB/"$FOLDER_CLOUD_NAME"_log.txt
+                echo "$FOLDER_CLOUD_NAME"_0$i OK tiempo $LOG2 hh:mm:ss
 
-                        end2=$(date +%s.%N)
-                        runtime2=$(python -c "print(${end2} - ${start2})")
-                        seconds2=`echo "$runtime2" | awk '{printf "%.0f\n", $1}'`
-
-                        hours2=$((${seconds2} / ${SECONDS_PER_HOUR}))
-                        seconds2=$((${seconds2} % ${SECONDS_PER_HOUR}))
-                        minutes2=$((${seconds2} / ${SECONDS_PER_MINUTE}))
-                        seconds2=$((${seconds2} % ${SECONDS_PER_MINUTE}))
-
-                        printf "%02d:%02d:%02d\n" ${hours2} ${minutes2} ${seconds2} > $TIME2
-
-                        LOG2=`cat $TIME2`
-
-                        echo "$FOLDER_CLOUD_NAME_0$i OK tiempo $LOG2 hh:mm:ss" >> $LOGJOB/"$FOLDER_CLOUD_NAME"_log.txt
-
-#            echo "This is the body" | mutt -s "Cloud parte $i OK" gustavo.adorno@gmail.com  <<< "Parte $i OK timepo de $LOG2 hh:mm:ss"
-                        echo "$FOLDER_CLOUD_NAME_0$i OK tiempo $LOG2 hh:mm:ss"
-
-            		else
+            else
             		start3=$(date +%s.%N)
-            
-            		drive upload --parent $ID --file $LIST/"$FOLDER_CLOUD_NAME"/"$FOLDER_CLOUD_NAME"_$i
-            
+                # subida parte 100-final
+            		drive upload --parent $ID --file $LIST/$FOLDER_CLOUD_NAME/"$FOLDER_CLOUD_NAME"_$i
+
             		end3=$(date +%s.%N)
             		runtime3=$(python -c "print(${end3} - ${start3})")
             		seconds3=`echo "$runtime3" | awk '{printf "%.0f\n", $1}'`
-
             		hours3=$((${seconds3} / ${SECONDS_PER_HOUR}))
             		seconds3=$((${seconds3} % ${SECONDS_PER_HOUR}))
             		minutes3=$((${seconds3} / ${SECONDS_PER_MINUTE}))
             		seconds3=$((${seconds3} % ${SECONDS_PER_MINUTE}))
-
             		printf "%02d:%02d:%02d\n" ${hours3} ${minutes3} ${seconds3} > $TIME3
-
             		LOG3=`cat $TIME3`
 
-            		echo "$FOLDER_CLOUD_NAME_$i OK tiempo $LOG3 hh:mm:ss" >> $LOGJOB/"$FOLDER_CLOUD_NAME"_log.txt
- 
-#            echo "This is the body" | mutt -s "Cloud parte $i OK" gustavo.adorno@gmail.com  <<< "Parte $i OK timepo de $LOG2 hh:mm:ss"
-            		echo "$FOLDER_CLOUD_NAME_$i OK tiempo $LOG3 hh:mm:ss"     
+            		echo "$FOLDER_CLOUD_NAME"_$i OK tiempo $LOG3 hh:mm:ss >> $LOGJOB/"$FOLDER_CLOUD_NAME"_log.txt
+            		echo "$FOLDER_CLOUD_NAME"_$i OK tiempo $LOG3 hh:mm:ss
 
-                 	fi
-	        	done
-
+             fi
+	        	 done
             		end=$(date +%s.%N)
             		runtime=$(python -c "print(${end} - ${start})")
             		seconds=`echo "$runtime" | awk '{printf "%.0f\n", $1}'`
-
             		hours=$((${seconds} / ${SECONDS_PER_HOUR}))
             		seconds=$((${seconds} % ${SECONDS_PER_HOUR}))
             		minutes=$((${seconds} / ${SECONDS_PER_MINUTE}))
             		seconds=$((${seconds} % ${SECONDS_PER_MINUTE}))
-
             		printf "%02d:%02d:%02d\n" ${hours} ${minutes} ${seconds} > $TIME
-
             		LOG4=`cat $TIME`
-
             		echo "Thats all folks!!!! Tiempo total $LOG4 hh:mm:ss" >> $LOGJOB/"$FOLDER_CLOUD_NAME"_log.txt
-#            echo "This is the body" | mutt -s "Cloud Listo!!!!" gustavo.adorno@gmail.com  <<< "That´s all folks!!!! timepo total $LOG3 hh:mm:ss"
-
-
-
 
 # Confirmacion y verificacion de la subida de archivos al CLOUD
-
-#touch $LOG/"$FOLDER_CLOUD_NAME"_confirmacion.txt
-
-		for (( i=0; i<$L; i++ ))
-		do
-		#sleep 5
-       			if [ $i -lt 10 ];                  # If $i is smaller than 10
-       			then 
-       			drive list -t "$FOLDER_CLOUD_NAME"_0$i >> $TEMP2
-      			echo "OK File $FOLDER_CLOUD_NAME_0$i"
-      			else
-       			drive list -t "$FOLDER_CLOUD_NAME"_$i >> $TEMP2      
-      			echo "OK File $FOLDER_CLOUD_NAME_$i"
-      		fi
-		done
+for (( i=0; i<$L; i++ ))
+do
+	if [ $i -lt 10 ];
+	then
+ 			drive list -t "$FOLDER_CLOUD_NAME"_00$i >> $TEMP2
+			echo OK File "$FOLDER_CLOUD_NAME"_00$i
+	elif [ $i -lt 99 ];
+  then
+ 			drive list -t "$FOLDER_CLOUD_NAME"_0$i >> $TEMP2
+			echo OK File "$FOLDER_CLOUD_NAME"_0$i
+  else
+      drive list -t "$FOLDER_CLOUD_NAME"_$i >> $TEMP2
+      echo OK File "$FOLDER_CLOUD_NAME"_$i
+  fi
+  done
 
 # Limpieza de las palabras Id Title Size y Created del archivo $FOLDER_CLOUD_NAME
 sed -e 's/Id//' -e 's/Title//' -e 's/Size//' -e 's/Created//' $TEMP2 > $TEMP3
@@ -251,47 +236,48 @@ touch $LOGJOB/"$FOLDER_CLOUD_NAME"_verificacion.txt
 		do
        			if [ $i -lt 10 ];
        			then
-               			value=$( grep -ic "$FOLDER_CLOUD_NAME"_0$i $LOGJOB/"$FOLDER_CLOUD_NAME"_confirmacion.txt )
-               			if [ $value -eq 1 ]
+               			value1=$( grep -ic "$FOLDER_CLOUD_NAME"_00$i $LOGJOB/"$FOLDER_CLOUD_NAME"_confirmacion.txt )
+               			if [ $value1 -eq 1 ]
                			then
-               			echo ""$FOLDER_CLOUD_NAME"_0$i OK"   >> $LOGJOB/"$FOLDER_CLOUD_NAME"_verificacion.txt
+               			echo "$FOLDER_CLOUD_NAME"_00$i OK >> $LOGJOB/"$FOLDER_CLOUD_NAME"_verificacion.txt
                			else
-               			echo ""$FOLDER_CLOUD_NAME"_0$i FAIL" >> $LOGJOB/"$FOLDER_CLOUD_NAME"_verificacion.txt
-               			drive upload --parent $ID --file $LIST/"$FOLDER_CLOUD_NAME"/"$FOLDER_CLOUD_NAME"_0$i
+               			echo "$FOLDER_CLOUD_NAME"_00$i FAIL >> $LOGJOB/"$FOLDER_CLOUD_NAME"_verificacion.txt
+               			drive upload --parent $ID --file $LIST/"$FOLDER_CLOUD_NAME"/"$FOLDER_CLOUD_NAME"_00$i
                			fi
-       			else
-               			value2=$( grep -ic "$FOLDER_CLOUD_NAME"_$i $LOGJOB/"$FOLDER_CLOUD_NAME"_confirmacion.txt )
+       			elif [ $i -lt 99 ];
+            then
+               			value2=$( grep -ic "$FOLDER_CLOUD_NAME"_0$i $LOGJOB/"$FOLDER_CLOUD_NAME"_confirmacion.txt )
                			if [ $value2 -eq 1 ]
                			then
-               			echo ""$FOLDER_CLOUD_NAME"_$i OK"   >> $LOGJOB/"$FOLDER_CLOUD_NAME"_verificacion.txt
-               		else
-               			echo ""$FOLDER_CLOUD_NAME"_$i FAIL" >> $LOGJOB/"$FOLDER_CLOUD_NAME"_verificacion.txt
-               			drive upload --parent $ID --file $LIST/"$FOLDER_CLOUD_NAME"/"$FOLDER_CLOUD_NAME"_$i
-               		fi
-       		fi
-		done
+               			echo "$FOLDER_CLOUD_NAME"_0$i OK   >> $LOGJOB/"$FOLDER_CLOUD_NAME"_verificacion.txt
+               	   	else
+               			echo "$FOLDER_CLOUD_NAME"_0$i FAIL >> $LOGJOB/"$FOLDER_CLOUD_NAME"_verificacion.txt
+               			drive upload --parent $ID --file $LIST/"$FOLDER_CLOUD_NAME"/"$FOLDER_CLOUD_NAME"_0$i
+               		  fi
+            else
+                    value3=$( grep -ic "$FOLDER_CLOUD_NAME"_$i $LOGJOB/"$FOLDER_CLOUD_NAME"_confirmacion.txt )
+                    if [ $value3 -eq 1 ]
+                    then
+                    echo "$FOLDER_CLOUD_NAME"_$i OK   >> $LOGJOB/"$FOLDER_CLOUD_NAME"_verificacion.txt
+                    else
+                    echo "$FOLDER_CLOUD_NAME"_$i FAIL >> $LOGJOB/"$FOLDER_CLOUD_NAME"_verificacion.txt
+                    drive upload --parent $ID --file $LIST/"$FOLDER_CLOUD_NAME"/"$FOLDER_CLOUD_NAME"_$i
+                    fi
+       		  fi
+		        done
 
 
 # Busqueda de un FAIL dentro del archivo LOG
-		value3=$( grep -ic "FAIL" $LOGJOB/"$FOLDER_CLOUD_NAME"_verificacion.txt )
-               		if [ $value3 -eq 1 ]
-               		then
-               		echo "OJOOOOOO Incompleto" 
-               		else
-               		# Borrado de carpeta temporal
-               		# rm -rf /DATA2/HISTORICO-DATA/split/"$FOLDER_CLOUD_NAME"
-               		echo "COMPLETO"
-               		fi
-
-
-  else
-  # Borrado de carpeta temporal
+value4=$( grep -ic "FAIL" $LOGJOB/"$FOLDER_CLOUD_NAME"_verificacion.txt )
+if [ $value4 -eq 1 ]
+   		then
+      		echo "OJOOOOOO Incompleto"
+      else
+        # Borrado de carpeta temporal
+      	# rm -rf /DATA2/HISTORICO-DATA/split/"$FOLDER_CLOUD_NAME"
+       		echo "COMPLETO"
+      fi
+# Este es el else del innicio que verifica el estado del archivo RAR
+else
   echo "RAR con error!!!!!!!!!!!!!!"
-  fi
-
-=======
-Esta es la linea 1
-linea 2
-linea 3
-linea 4
->>>>>>> 16d5038e79792a0b240f206663fa6d20ae0ec8d9
+fi
