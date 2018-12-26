@@ -1,7 +1,5 @@
-<<<<<<< HEAD
 #!/bin/sh
 #!/bin/bash
-
 
 filecloud=$(pwd)
 echo $filecloud
@@ -14,11 +12,6 @@ TMP=$filecloud/tmp
 echo $LIST
 echo $LOG
 echo $TMP
-
-
-# Folders
-LIST=/DATA2/HISTORICO-DATA/split
-LOG=/DATA2/HISTORICO-DATA/split/log
 
 # archivos
 SET=$TMP/set.txt
@@ -33,7 +26,6 @@ TEMP3=$TMP/temp3.txt
 TEMP4=$TMP/temp4.txt
 TEMP5=$TMP/temp5.txt
 
-
 cat /dev/null > $SET
 cat /dev/null > $TIME
 cat /dev/null > $TIME1
@@ -44,7 +36,6 @@ cat /dev/null > $TEMP2
 cat /dev/null > $TEMP3
 cat /dev/null > $TEMP4
 cat /dev/null > $TEMP5
-
 
 #---------------------------------------------------------------
 # Captura del nombre del archivo .rar para generar las carpetas
