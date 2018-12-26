@@ -103,6 +103,7 @@ echo "Total $L partes  Hora de inicio $(date '+%Y-%m-%d') $(date +"%T")" >> $LOG
 #--------Si los archivos son menores a 100------------------------------------
 if [ $L -lt 99 ];
    then
+       echo " - de 100 archivos ETAPA 1" 
        for (( i=0; i<$L; i++ ))
        do
             if [ $i -lt 10 ];
@@ -121,8 +122,8 @@ if [ $L -lt 99 ];
 
                 LOG1=`cat $TIME1`
 
-                echo "$FOLDER_CLOUD_NAME"_0$i tiempo $LOG1 hh:mm:ss >> $LOGJOB/"$FOLDER_CLOUD_NAME"_log.txt
-                echo "$FOLDER_CLOUD_NAME"_0$i tiempo $LOG1 hh:mm:ss
+                echo "$FOLDER_CLOUD_NAME"_00$i tiempo $LOG1 hh:mm:ss >> $LOGJOB/"$FOLDER_CLOUD_NAME"_log.txt
+                echo "$FOLDER_CLOUD_NAME"_00$i tiempo $LOG1 hh:mm:ss
 
                 else
 
@@ -218,6 +219,7 @@ fi
 
 #-------------------------------------------------------------------------------
 else
+echo "+ de 100 archivos ETAPA 2"
 #-------Final del condicional de ID menor de 100--------------------------------
 for (( i=0; i<$L; i++ ))
  do
